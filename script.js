@@ -262,8 +262,8 @@ for (var i=0;i<files.length;i++) {
 
         if (foundInputCommand) {
 
-          // if input was found during (3 2 1 GO!)
-          if (n < 30) {
+          // if input was found during (Ready! GO!)
+          if (n < 45) {
             // ENDER FROM PREVIOUS GAME
             // if prev game exists
             if (i > 0) {
