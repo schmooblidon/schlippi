@@ -1,5 +1,6 @@
 // GRAB EXTERNAL STUFF WE NEED
-const { default: SlippiGame } = require('slp-parser-js');
+const slp = require('slp-parser-js');
+const SlippiGame = slp.default;
 const fs = require('fs');
 const path = require('path');
 
@@ -44,77 +45,6 @@ const Button = {
   start : 0x1000
 }
 
-const externalCharacterIDs = {
-  0x00 : "Captain Falcon",
-  0x01 : "Donkey Kong",
-  0x02 : "Fox",
-  0x03 : "Mr. Game & Watch",
-  0x04 : "Kirby",
-  0x05 : "Bowser",
-  0x06 : "Link",
-  0x07 : "Luigi",
-  0x08 : "Mario",
-  0x09 : "Marth",
-  0x0A : "Mewtwo",
-  0x0B : "Ness",
-  0x0C : "Peach",
-  0x0D : "Pikachu",
-  0x0E : "Ice Climbers",
-  0x0F : "Jigglypuff",
-  0x10 : "Samus",
-  0x11 : "Yoshi",
-  0x12 : "Zelda",
-  0x13 : "Sheik",
-  0x14 : "Falco",
-  0x15 : "Young Link",
-  0x16 : "Dr. Mario",
-  0x17 : "Roy",
-  0x18 : "Pichu",
-  0x19 : "Ganondorf",
-  0x1A : "Master Hand",
-  0x1B : "Male Wireframe",
-  0x1C : "Female Wireframe",
-  0x1D : "Giga Bower",
-  0x1E : "Crazy Hand",
-  0x1F : "Sandbag",
-  0x20 : "Popo"
-}
-
-const stageIds = {
-  0x000 : "Dummy",
-  0x001 : "TEST",
-  0x002 : "Fountain of Dreams",
-  0x003 : "Pokémon Stadium",
-  0x004 : "Princess Peach's Castle",
-  0x005 : "Kongo Jungle",
-  0x006 : "Brinstar",
-  0x007 : "Corneria",
-  0x008 : "Yoshi's Story",
-  0x009 : "Onett",
-  0x00A : "Mute City",
-  0x00B : "Rainbow Cruise",
-  0x00C : "Jungle Japes",
-  0x00D : "Great Bay",
-  0x00E : "Hyrule Temple",
-  0x00F : "Brinstar Depths",
-  0x010 : "Yoshi's Island",
-  0x011 : "Green Greens",
-  0x012 : "Fourside",
-  0x013 : "Mushroom Kingdom I",
-  0x014 : "Mushroom Kingdom II",
-  0x015 : "Akaneia",
-  0x016 : "Venom",
-  0x017 : "Poké Floats",
-  0x019 : "Icicle Mountain",
-  0x01A : "Icetop",
-  0x01B : "Flat Zone",
-  0x01C : "Dream Land N64",
-  0x01D : "Yoshi's Island N64",
-  0x01E : "Kongo Jungle N64",
-  0x01F : "Battlefield",
-  0x020 : "Final Destination"
-}
-
 // -- MELEE CONSTANTS END --
 
 // ------- BIG BOI CODE --------
@@ -125,7 +55,7 @@ function GetCharName (players, p) {
   var char_name = "";
   for (var m=0;m<players.length;m++) {
     if (players[m].playerIndex == p) {
-      char_name = externalCharacterIDs[players[m].characterId];
+      char_name = slp.characters.getCharacterName(players[m].characterId);
       break;
     }
   }
@@ -170,7 +100,6 @@ function SearchDirectory(cur_path) {
     if (dirs[i].isFile()) {
       if (path.extname(dirs[i].name) == ".slp") {
         files.push((using_absolute_paths ? "" : (__dirname + "/") ) + cur_path + "/" + dirs[i].name);
-        fileCount++;
       }
     }
     else if (dirs[i].isDirectory()) {
@@ -180,11 +109,10 @@ function SearchDirectory(cur_path) {
 }
 
 var files = [];
-var fileCount = 0;
 
 SearchDirectory(replay_path);
 
-console.log("Found "+fileCount+" replay files!");
+console.log(`Found ${files.length} replay files!`);
 
 // create output json object (what dolphin reads)
 var output = {
@@ -225,13 +153,13 @@ for (var i=0;i<files.length;i++) {
   // if game is too short
   if (metadata.lastFrame < minimumGameTime) continue;
 
-  const frames = game.getFrames();
-
-  // this needs to be checked AFTER game.getFrames()
-  if (game.gameEnd == null || game.gameEnd == undefined) {
+  if (!game.getGameEnd()) {
+    console.log(gameEnd)
     console.log("Bad file! Did the game crash?");
     continue;
   }
+
+  const frames = game.getFrames();
 
   // reset lockout
   var lockout = 0;
@@ -280,7 +208,7 @@ for (var i=0;i<files.length;i++) {
               lockout = captureLockoutTime;
               momentCount++;
 
-              console.log("[MOMENT #"+(momentCount < 10 ? "0" : "")+momentCount+"] Port "+(p+1)+" | "+GetCharName(prev_settings.players, p)+" | "+stageIds[prev_settings.stageId]+" | "+GetTimeText(prev_metadata.lastFrame)+" into game | ENDER!");
+              console.log(`[MOMENT #${momentCount.toString().padStart(1, '0')}] Port ${p+1} | ${GetCharName(prev_settings.players, p)} | ${slp.stages.getStageName(prev_settings.stageId)} | ${GetTimeText(prev_metadata.lastFrame)} into game | ENDER!`);
 
             }
           }
@@ -295,7 +223,7 @@ for (var i=0;i<files.length;i++) {
             lockout = captureLockoutTime;
             momentCount++;
             
-            console.log("[MOMENT #"+(momentCount < 10 ? "0" : "")+momentCount+"] Port "+(p+1)+" | "+GetCharName(settings.players, p)+" | "+stageIds[settings.stageId]+" | "+GetTimeText(n)+" into game");
+            console.log(`[MOMENT #${momentCount.toString().padStart(1, '0')}] Port ${p+1} | ${GetCharName(settings.players, p)} | ${slp.stages.getStageName(settings.stageId)} | ${GetTimeText(n)} into game`);
           }
         }
       }
@@ -303,13 +231,13 @@ for (var i=0;i<files.length;i++) {
   }
 }
 
-console.log("Found "+momentCount+ " moments!");
+console.log(`Found ${momentCount} moments!`);
 
 // now write the output to a json file
 
 let jsonText = JSON.stringify(output);
 
-fs.writeFile(output_path_and_filename+".json", jsonText, function(err) {
+fs.writeFile(`${output_path_and_filename}.json`, jsonText, function(err) {
     if(err) {
         return console.log(err);
     }
