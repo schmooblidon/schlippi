@@ -154,7 +154,6 @@ for (var i=0;i<files.length;i++) {
   if (metadata.lastFrame < minimumGameTime) continue;
 
   if (!game.getGameEnd()) {
-    console.log(gameEnd)
     console.log("Bad file! Did the game crash?");
     continue;
   }
