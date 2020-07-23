@@ -8,3 +8,5 @@ schlippi requires slp-parser-js
 In the terminal, run `npm install slp-parser-js`
 
 Open the output clipshow files by moving to your slippi dolphin's directory and running `start Dolphin.exe -i "C:/whateverpath/moments.json"`
+
+Detailed instructions: https://www.reddit.com/r/SSBM/comments/firaer/introducing_schlippi_a_node_script_that_finds/
