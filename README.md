@@ -5,7 +5,7 @@ In game tag a moment you want saved by inputting your command (default is L+R+Z)
 
 schlippi requires slp-parser-js
 
-In the terminal, run `npm install slp-parser-js`
+In the terminal, run `npm install @slippi/slippi-js`
 
 Open the output clipshow files by moving to your slippi dolphin's directory and running `start Dolphin.exe -i "C:/whateverpath/moments.json"`
 
